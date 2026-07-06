@@ -1679,6 +1679,12 @@
                                             'minimum_delivery_charges': minimum_delivery_charges,
                                             'minimum_delivery_charges_within_km': minimum_delivery_charges_within_km
                                         };
+                                        // SERVICE_62F_A_VENDOR_PROFILE_WRITE_NORMALIZER
+                                        var normalizedVendorCategories = Array.isArray(cuisines) ? cuisines.filter(Boolean) : (cuisines ? [cuisines] : []);
+                                        var normalizedGalleryPhotos = Array.isArray(GalleryIMG) ? GalleryIMG.filter(Boolean) : (GalleryIMG ? [GalleryIMG] : []);
+                                        var normalizedVendorPhoto = normalizedGalleryPhotos.length > 0 ? normalizedGalleryPhotos[0] : null;
+                                        var normalizedVendorCommission = vendorCommission || null;
+
                                         coordinates = new firebase.firestore.GeoPoint(latitude, longitude);
                                         var vendorData = {
                                             'title': vendorname,
@@ -2499,4 +2505,5 @@
         }
     </script>
 @endsection
+
 
