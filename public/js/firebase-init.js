@@ -6,7 +6,22 @@
         return;
     }
 
-    if (firebase.apps && firebase.apps.length > 0) {
+    function hasDefaultFirebaseApp() {
+        try {
+            if (firebase.apps && firebase.apps.length > 0) {
+                return true;
+            }
+            if (typeof firebase.app === 'function') {
+                firebase.app();
+                return true;
+            }
+        } catch (e) {
+            return false;
+        }
+        return false;
+    }
+
+    if (hasDefaultFirebaseApp()) {
         return;
     }
 
@@ -21,5 +36,13 @@
         measurementId: 'G-8FNRCWJ466'
     };
 
-    firebase.initializeApp(firebaseConfig);
+    try {
+        firebase.initializeApp(firebaseConfig);
+    } catch (e) {
+        if (e && (e.code === 'app/duplicate-app' || String(e.message || '').indexOf('already exists') !== -1)) {
+            console.warn('Firebase default app already initialized; continuing.');
+            return;
+        }
+        throw e;
+    }
 })();
