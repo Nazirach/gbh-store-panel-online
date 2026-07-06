@@ -1,4 +1,4 @@
-@extends('layouts.app')
+﻿@extends('layouts.app')
 
 @section('content')
     <div class="page-wrapper">
@@ -336,6 +336,56 @@
         var currencyAtRight = false;
         var decimal_degits = 0;
         var categories_list=[];
+
+        // SERVICE_62F_B_VENDOR_PRODUCT_WRITE_NORMALIZER_HELPERS
+        function normalizeProductNumber(value) {
+            if (value === '' || value === null || value === undefined) {
+                return value;
+            }
+            if (typeof value === 'number') {
+                return value;
+            }
+            var cleaned = String(value).replace(/,/g, '').trim();
+            if (cleaned === '') {
+                return value;
+            }
+            var parsed = Number(cleaned);
+            return Number.isFinite(parsed) ? parsed : value;
+        }
+
+        function normalizeProductCategory(value) {
+            if (Array.isArray(value)) {
+                return value.length > 0 ? value[0] : '';
+            }
+            return value || '';
+        }
+
+        function normalizeProductPhotos(primaryPhoto, photoList) {
+            var list = Array.isArray(photoList) ? photoList.filter(Boolean) : (photoList ? [photoList] : []);
+            if ((!primaryPhoto || primaryPhoto === '') && list.length > 0) {
+                primaryPhoto = list[0];
+            }
+            if (primaryPhoto && list.length === 0) {
+                list = [primaryPhoto];
+            }
+            return {
+                photo: primaryPhoto || '',
+                photos: list
+            };
+        }
+
+        function normalizeItemAttributeNumbers(itemAttribute) {
+            if (!itemAttribute || !Array.isArray(itemAttribute.variants)) {
+                return itemAttribute;
+            }
+            itemAttribute.variants = itemAttribute.variants.map(function(variant) {
+                if (!variant) return variant;
+                variant.variant_price = normalizeProductNumber(variant.variant_price);
+                variant.variant_quantity = normalizeProductNumber(variant.variant_quantity);
+                return variant;
+            });
+            return itemAttribute;
+        }
         var subscriptionBusinessModel = database.collection('settings').doc("vendor");
         subscriptionBusinessModel.get().then(async function(snapshots) {
                 var subscriptionSetting = snapshots.data();
@@ -746,19 +796,42 @@
                                 if (normalizedProductPhotos.length > 0) {
                                     photo = normalizedProductPhotos[0];
                                 }
+
+                                // SERVICE_62F_B_CREATE_PRODUCT_WRITE_CONTRACT
+                                var normalizedProductImage = normalizeProductPhotos(photo, normalizedProductPhotos);
+                                var normalizedProductCategory = normalizeProductCategory(category);
+                                var normalizedProductPrice = normalizeProductNumber(price);
+                                var normalizedProductDiscount = normalizeProductNumber(discount);
+                                var normalizedProductQuantity = parseInt(item_quantity);
+                                var normalizedItemAttribute = normalizeItemAttributeNumbers(item_attribute);
+                                var normalizedVendorZoneId = null;
+                                var normalizedProductAdminCommission = null;
+                                var normalizedProductAdminCommision = null;
+
+                                try {
+                                    var vendorForProductSnap = await database.collection('vendors').doc(vandorId).get();
+                                    if (vendorForProductSnap.exists) {
+                                        var vendorForProduct = vendorForProductSnap.data() || {};
+                                        normalizedVendorZoneId = vendorForProduct.zoneId || null;
+                                        normalizedProductAdminCommission = vendorForProduct.adminCommission || vendorForProduct.adminCommision || null;
+                                        normalizedProductAdminCommision = normalizedProductAdminCommission;
+                                    }
+                                } catch (normalizerErr) {
+                                    console.warn('SERVICE_62F_B create product vendor mirror skipped', normalizerErr);
+                                }
+
                                 database.collection('vendor_products')
                                     .doc(id).set({
                                         'name': name,
-                                        'price': price,
-                                        'quantity': parseInt(
-                                            item_quantity),
-                                        'disPrice': discount,
+                                        'price': normalizedProductPrice,
+                                        'quantity': normalizedProductQuantity,
+                                        'disPrice': normalizedProductDiscount,
                                         'vendorID': vandorId,
-                                        'categoryID': category,
+                                        'categoryID': normalizedProductCategory,
                                         'brandID': brand,
-                                        'photo': photo,
+                                        'photo': normalizedProductImage.photo,
                                         // SERVICE_60H_STORE_PANEL_PRODUCT_PHOTO_PHOTOS_DRIFT_PATCH
-                                        'photos': normalizedProductPhotos,
+                                        'photos': normalizedProductImage.photos,
                                         'calories': itemCalories,
                                         "grams": itemGrams,
                                         'proteins': itemProteins,
@@ -768,13 +841,16 @@
                                         'section_id': section_id,
                                         // SERVICE_60G_STORE_PANEL_SECTION_FIELD_NORMALIZER_PATCH
                                         'sectionId': section_id,
+                                        'zoneId': normalizedVendorZoneId,
+                                        'adminCommission': normalizedProductAdminCommission,
+                                        'adminCommision': normalizedProductAdminCommision,
                                         'nonveg': nonveg,
                                         'veg': veg,
                                         'addOnsTitle': addOnesTitle,
                                         'addOnsPrice': addOnesPrice,
                                         'takeawayOption': itemTakeaway,
                                         'id': id,
-                                        'item_attribute': item_attribute,
+                                        'item_attribute': normalizedItemAttribute,
                                         'product_specification': product_specification,
                                         'isDigitalProduct': is_digital_product,
                                         'digitalProduct': DigitalImg,
@@ -1219,3 +1295,4 @@
         });
     </script>
 @endsection
+
