@@ -35,14 +35,14 @@
         <!-- Profil -->
         <li class="nav-item dropdown">
 
-		 <a class="nav-link dropdown-toggle text-muted waves-effect waves-dark" href="" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><img src="{{ asset('images/ghalbit-maritronix-icon.svg') }}" onerror="this.onerror=null; this.src='{{ asset('images/ghalbit-maritronix-icon.svg') }}';" alt="user" class="profile-pic userimage" id="user_avatar"></a>
-        
+         <a class="nav-link dropdown-toggle text-muted waves-effect waves-dark" href="" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><img src="{{ asset('images/ghalbit-maritronix-icon.svg') }}" onerror="this.onerror=null; this.src='{{ asset('images/ghalbit-maritronix-icon.svg') }}';" alt="user" class="profile-pic userimage" id="user_avatar"></a>
+         
             <div class="dropdown-menu dropdown-menu-right scale-up">
                 <ul class="dropdown-user">
                     <li>
                         <div class="dw-user-box">
                             <div class="u-img"><img src="{{ asset('images/ghalbit-maritronix-icon.svg') }}" onerror="this.onerror=null; this.src='{{ asset('images/ghalbit-maritronix-icon.svg') }}';" id="user_image" class="userimage" alt="user" style="max-width: 45px;"></div>
-                            
+                             
                             <div class="u-text">
                             <h4 id="username"></h4>
                             <small class="ghalbit-profile-role">Store Panel Operator</small>
@@ -129,12 +129,11 @@
 <script>
     var doNotDeleteAlert = "{{trans('lang.this_is_for_demo_we_can_not_allow_to_delete')}}";
 
-    // Wait for DOM + jQuery to be fully loaded
     $(document).ready(function () {
         var database = firebase.firestore();
-        let placeholderImage = '';
+        var localIcon = "{{ asset('images/ghalbit-maritronix-icon.svg') }}";
+        var placeholderImage = localIcon;
 
-        // 1. Fetch placeholder from Firestore
         database.collection('settings').doc('placeHolderImage')
             .get()
             .then(function (snapshot) {
@@ -142,55 +141,50 @@
                     placeholderImage = snapshot.data().image;
                 }
                 applyGlobalPlaceholder();
-                applyUserImagePlaceholder();   // Now safe to run
+                applyUserImagePlaceholder();
             })
             .catch(function (err) {
                 console.error('Firestore placeholder error:', err);
+                placeholderImage = localIcon;
                 applyGlobalPlaceholder();
                 applyUserImagePlaceholder();
             });
 
-        // 2. Apply onerror fallback to ALL images
-        function applyGlobalPlaceholder() {
-            if (!placeholderImage) return;
+        function isUserProfileImage($img) {
+            var id = String($img.attr('id') || '').toLowerCase();
+            var cls = String($img.attr('class') || '').toLowerCase();
+            return id === 'user_avatar' || id === 'user_image' || cls.indexOf('userimage') !== -1 || cls.indexOf('profile-pic') !== -1;
+        }
 
+        function applyGlobalPlaceholder() {
             $('img').each(function () {
                 var $img = $(this);
-                if (!$img.data('placeholder')) {
-                    $img.data('placeholder', placeholderImage);
+                if (isUserProfileImage($img)) {
+                    return;
                 }
 
-                // Replace or set onerror
+                if (!$img.data('placeholder')) {
+                    $img.data('placeholder', placeholderImage || localIcon);
+                }
+
                 $img.off('error').on('error', function () {
-                    if ($(this).data('placeholder')) {
-                        this.src = $(this).data('placeholder');
-                    }
+                    this.src = $(this).data('placeholder') || localIcon;
                 });
             });
         }
 
-        // 3. FORCE placeholder into #user_image and #user_avatar
         function applyUserImagePlaceholder() {
-            if (!placeholderImage) return;
-
-            var $userImg   = $('#user_image');
-            var $avatarImg = $('#user_avatar');
-
-            // Update #user_image (dropdown)
-            if ($userImg.length) {
-                if (!$userImg.data('original-src')) {
-                    $userImg.data('original-src', $userImg.attr('src'));
+            $('#user_image, #user_avatar').each(function () {
+                var $img = $(this);
+                if (!$img.data('original-src')) {
+                    $img.data('original-src', $img.attr('src'));
                 }
-                $userImg.attr('src', placeholderImage);   // This is what you want
-            }
-
-            // Update #user_avatar (navbar trigger) – optional but consistent
-            if ($avatarImg.length) {
-                if (!$avatarImg.data('original-src')) {
-                    $avatarImg.data('original-src', $avatarImg.attr('src'));
-                }
-                $avatarImg.attr('src', placeholderImage);
-            }
+                $img.off('error').on('error', function () {
+                    this.onerror = null;
+                    this.src = localIcon;
+                });
+                $img.attr('src', localIcon);
+            });
         }
     });
    
