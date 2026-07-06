@@ -16,6 +16,16 @@
         return defaultBucket;
     }
 
+    function isProfileAvatar(img) {
+        if (!img) {
+            return false;
+        }
+        var id = String(img.id || '').toLowerCase();
+        var cls = String(img.className || '').toLowerCase();
+        var alt = String(img.getAttribute('alt') || '').toLowerCase();
+        return id.indexOf('avatar') !== -1 || id.indexOf('user_avatar') !== -1 || cls.indexOf('userimage') !== -1 || cls.indexOf('profile-pic') !== -1 || cls.indexOf('avatar') !== -1 || alt.indexOf('pengguna') !== -1 || alt.indexOf('user') !== -1;
+    }
+
     function looksLikeStoragePath(value) {
         if (!value || typeof value !== 'string') {
             return false;
@@ -50,20 +60,29 @@
             return;
         }
 
+        if (isProfileAvatar(img)) {
+            img.dataset.storageNormalizerDone = '1';
+            return;
+        }
+
         var raw = img.getAttribute('src') || '';
         var normalized = normalizeStoragePath(raw);
+        var touchedByNormalizer = normalized && normalized !== raw;
+        var isBrandLogo = String(raw).indexOf('ghalbit-maritronix-logo.svg') !== -1 || String(img.className || '').toLowerCase().indexOf('logo') !== -1;
 
-        if (normalized && normalized !== raw) {
+        if (touchedByNormalizer) {
             img.setAttribute('src', normalized);
         }
 
-        img.addEventListener('error', function () {
-            if (img.dataset.storageFallbackDone === '1') {
-                return;
-            }
-            img.dataset.storageFallbackDone = '1';
-            img.setAttribute('src', fallbackImage);
-        });
+        if (touchedByNormalizer || isBrandLogo) {
+            img.addEventListener('error', function () {
+                if (img.dataset.storageFallbackDone === '1' || isProfileAvatar(img)) {
+                    return;
+                }
+                img.dataset.storageFallbackDone = '1';
+                img.setAttribute('src', fallbackImage);
+            });
+        }
 
         img.dataset.storageNormalizerDone = '1';
     }
