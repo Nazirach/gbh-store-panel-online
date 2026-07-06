@@ -1,4 +1,4 @@
-@extends('layouts.app')
+﻿@extends('layouts.app')
 @section('content')
     <style>
         .store-profile-page .vendor_payout_create-inner {
@@ -1686,12 +1686,12 @@
                                             'latitude': latitude,
                                             'longitude': longitude,
                                             'location': address,
-                                            'photo': (Array.isArray(GalleryIMG) && GalleryIMG.length > 0) ? GalleryIMG[0] : null,
-                                            'photos': GalleryIMG,
+                                            'photo': normalizedVendorPhoto,
+                                            'photos': normalizedGalleryPhotos,
                                             'section_id': section_id,
                                             // SERVICE_60G_STORE_PANEL_SECTION_FIELD_NORMALIZER_PATCH
                                             'sectionId': section_id,
-                                            'categoryID': cuisines,
+                                            'categoryID': normalizedVendorCategories,
                                             'phonenumber': phonenumber,
                                             'categoryTitle': categoryTitle,
                                             'coordinates': coordinates,
@@ -1701,7 +1701,8 @@
                                             'restaurantCost': restaurantCost,
                                             'deliveryCharge': deliveryCharge,
                                             'workingHours': workingHours,
-                                            'adminCommission': vendorCommission,
+                                            'adminCommission': normalizedVendorCommission,
+                                             'adminCommision': normalizedVendorCommission,
                                             'isSelfDelivery': enable_self_delivery,
                                             'zoneId': zoneId,
                                             'filters': filters_new,
@@ -2498,3 +2499,4 @@
         }
     </script>
 @endsection
+
