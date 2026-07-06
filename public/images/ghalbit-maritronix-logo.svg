@@ -1,0 +1,19 @@
+<svg width="420" height="96" viewBox="0 0 420 96" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="gmLogoShield" x1="18" y1="8" x2="88" y2="88" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#7CEBFF"/>
+      <stop offset="0.45" stop-color="#2FC2FF"/>
+      <stop offset="1" stop-color="#2867FF"/>
+    </linearGradient>
+  </defs>
+  <path d="M52 6L86 19V47.5C86 68.4 72.8 87.2 52 97C31.2 87.2 18 68.4 18 47.5V19L52 6Z" fill="#071B31"/>
+  <path d="M52 9L83 20.8V47.5C83 66.5 71 83.7 52 92.8C33 83.7 21 66.5 21 47.5V20.8L52 9Z" fill="url(#gmLogoShield)"/>
+  <path d="M52 18L74.5 27V46.1C74.5 60.2 65.7 73 52 79.8C38.3 73 29.5 60.2 29.5 46.1V27L52 18Z" fill="#08233D"/>
+  <path d="M47 39C47 36.2 49.2 34 52 34C54.8 34 57 36.2 57 39V57.5H47V39Z" fill="#08233D"/>
+  <path d="M39 57C39 49.8 44.8 44 52 44C59.2 44 65 49.8 65 57V60.5H39V57Z" fill="#0EA6D8"/>
+  <path d="M31 38H39" stroke="#72E7FF" stroke-width="5" stroke-linecap="round"/>
+  <path d="M65 38H73" stroke="#72E7FF" stroke-width="5" stroke-linecap="round"/>
+  <path d="M43 71L52 78L61 71" stroke="#72E7FF" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+  <text x="110" y="40" fill="#F4FBFF" font-family="Arial, Helvetica, sans-serif" font-size="25" font-weight="800" letter-spacing="2">GHALBIT MARITRONIX</text>
+  <text x="110" y="67" fill="#8CCCF5" font-family="Arial, Helvetica, sans-serif" font-size="16" font-weight="500">Integrated Maritime &amp; Land Intelligence Platform</text>
+</svg>
