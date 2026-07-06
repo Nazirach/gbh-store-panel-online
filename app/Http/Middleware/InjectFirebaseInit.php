@@ -26,11 +26,19 @@ class InjectFirebaseInit
             return $response;
         }
 
-        if (stripos($content, 'firebase-init.js') !== false) {
-            return $response;
+        $scripts = '';
+
+        if (stripos($content, 'firebase-init.js') === false) {
+            $scripts .= '<script src="' . asset('js/firebase-init.js') . '?v=62c2"></script>' . PHP_EOL;
         }
 
-        $script = '<script src="' . asset('js/firebase-init.js') . '?v=62c"></script>';
+        if (stripos($content, 'storage-image-normalizer.js') === false) {
+            $scripts .= '<script src="' . asset('js/storage-image-normalizer.js') . '?v=62d"></script>' . PHP_EOL;
+        }
+
+        if ($scripts === '') {
+            return $response;
+        }
 
         $patterns = [
             '#(<script[^>]+src=["\'][^"\']*js/jquery\.cookie\.js[^"\']*["\'][^>]*>\s*</script>)#i',
@@ -39,7 +47,7 @@ class InjectFirebaseInit
 
         foreach ($patterns as $pattern) {
             if (preg_match($pattern, $content)) {
-                $content = preg_replace($pattern, '$1' . PHP_EOL . $script, $content, 1);
+                $content = preg_replace($pattern, '$1' . PHP_EOL . $scripts, $content, 1);
                 $response->setContent($content);
                 return $response;
             }
