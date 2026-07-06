@@ -112,9 +112,13 @@
 	};
 
 	$.decrypt = function(raw){
+		if (typeof raw !== 'string' || raw.length === 0) {
+			console.warn('jquery.cookie decrypt skipped: empty cookie value');
+			return '';
+		}
 		var bytes = [], str;
 		for(var i=0; i< raw.length-1; i+=2)
 			bytes.push(parseInt(raw.substr(i, 2), 16));
-		return String.fromCharCode.apply(String, bytes);    
+		return String.fromCharCode.apply(String, bytes);
 	}
 }));
